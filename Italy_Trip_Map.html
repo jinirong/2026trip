@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>북이탈리아 여행 루트 지도</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { display: flex; height: 100vh; font-family: 'Segoe UI', 'Apple SD Gothic Neo', sans-serif; background: #0f172a; }
+
+    /* ── Sidebar ── */
+    #sidebar {
+      width: 280px; min-width: 240px;
+      background: #0f172a;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      border-right: 1px solid #1e293b;
+    }
+    #sidebar-header {
+      padding: 18px 16px 14px;
+      background: linear-gradient(135deg, #1a3020, #2d4a1e);
+      border-bottom: 1px solid #2d4030;
+    }
+    #sidebar-header h2 { font-size: .95rem; font-weight: 800; color: #86efac; letter-spacing: -0.3px; }
+    #sidebar-header p  { font-size: .72rem; color: #6ee7b7; margin-top: 3px; }
+
+    /* legend */
+    .legend { padding: 10px 14px; border-bottom: 1px solid #1e293b; display: flex; flex-wrap: wrap; gap: 6px; }
+    .leg { display: flex; align-items: center; gap: 5px; font-size: .65rem; color: #94a3b8; }
+    .leg-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .leg-line { width: 18px; height: 3px; flex-shrink: 0; border-radius: 2px; }
+
+    /* stop list */
+    #stop-list { flex: 1; overflow-y: auto; padding: 6px 0; }
+    #stop-list::-webkit-scrollbar { width: 4px; }
+    #stop-list::-webkit-scrollbar-track { background: #0f172a; }
+    #stop-list::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+
+    .stop-item {
+      padding: 8px 14px;
+      cursor: pointer;
+      display: flex; align-items: center; gap: 10px;
+      transition: background .15s;
+      border-bottom: 1px solid #1e293b;
+    }
+    .stop-item:hover { background: #1e293b; }
+    .stop-item.active { background: #1a3020; }
+
+    .stop-num {
+      width: 22px; height: 22px; border-radius: 50%;
+      font-size: .65rem; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; color: #fff;
+    }
+    .stop-info { flex: 1; min-width: 0; }
+    .stop-name { font-size: .78rem; font-weight: 700; color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .stop-en   { font-size: .65rem; color: #64748b; }
+    .stop-day  { font-size: .62rem; font-weight: 600; color: #86efac; margin-top: 1px; }
+
+    .transport-badge {
+      font-size: .58rem; font-weight: 700; padding: 2px 6px;
+      border-radius: 999px; white-space: nowrap;
+    }
+    .badge-train { background: rgba(59,130,246,.25); color: #93c5fd; }
+    .badge-car   { background: rgba(34,197,94,.20);  color: #86efac; }
+
+    /* ── Map ── */
+    #map { flex: 1; }
+
+    /* custom marker */
+    .marker-circle {
+      width: 28px; height: 28px; border-radius: 50%;
+      border: 2.5px solid rgba(255,255,255,.9);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .62rem; font-weight: 800; color: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,.5);
+    }
+
+    /* popup */
+    .leaflet-popup-content-wrapper { background: #1e293b; color: #e2e8f0; border-radius: 10px; border: 1px solid #334155; box-shadow: 0 8px 24px rgba(0,0,0,.5); }
+    .leaflet-popup-content { margin: 12px 14px; }
+    .leaflet-popup-tip { background: #1e293b; }
+    .p-title { font-size: .9rem; font-weight: 800; color: #86efac; }
+    .p-en    { font-size: .7rem; color: #64748b; margin-bottom: 6px; }
+    .p-desc  { font-size: .78rem; color: #cbd5e1; line-height: 1.5; }
+    .p-day   { font-size: .68rem; font-weight: 600; color: #f59e0b; margin-top: 5px; }
+  </style>
+</head>
+<body>
+
+<div id="sidebar">
+  <div id="sidebar-header">
+    <h2>🇮🇹 북이탈리아 여행 루트</h2>
+    <p>9/5 ~ 9/12 · 3명 · 8일</p>
+  </div>
+
+  <div class="legend">
+    <div class="leg"><div class="leg-dot" style="background:#f59e0b"></div>도시</div>
+    <div class="leg"><div class="leg-dot" style="background:#06b6d4"></div>호수</div>
+    <div class="leg"><div class="leg-dot" style="background:#10b981"></div>산악</div>
+    <div class="leg"><div class="leg-dot" style="background:#f97316"></div>거점</div>
+    <div class="leg"><div class="leg-dot" style="background:#ec4899"></div>경유/명소</div>
+    <div class="leg"><div class="leg-dot" style="background:#64748b"></div>공항</div>
+    <div class="leg"><div class="leg-line" style="background:#3b82f6"></div>기차</div>
+    <div class="leg"><div class="leg-line" style="background:#22c55e"></div>렌터카</div>
+    <div class="leg"><div class="leg-line" style="background:#86efac; opacity:.7"></div>당일 드라이브</div>
+  </div>
+
+  <div id="stop-list"></div>
+</div>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const stops = [
+  { id:0,  name:"니스 (출발)",         en:"Nice, France",              coords:[43.7102, 7.2620],  type:"transit",  day:"9/5",      desc:"TGV 07:54 출발 → 밀라노 13:00 (약 5시간)" },
+  { id:1,  name:"밀라노",               en:"Milano Centrale",            coords:[45.4862, 9.2045],  type:"city",     day:"9/5~6",    desc:"두오모 · 갈레리아 · 브레라 미술관" },
+  { id:2,  name:"벨라지오 (꼬모)",      en:"Bellagio, Lake Como",        coords:[45.9862, 9.2594],  type:"lake",     day:"9/6 당일", desc:"호수의 진주 · 수변 산책 · 빌라 감상" },
+  { id:3,  name:"리바 델 가르다",       en:"Riva del Garda",             coords:[45.8855, 10.8410], type:"stop",     day:"9/7 경유", desc:"가르다 호수 전망대 잠깐 스톱" },
+  { id:4,  name:"산타 막달레나",        en:"Santa Maddalena, Val Funes", coords:[46.6305, 11.7235], type:"scenic",   day:"9/7 경유", desc:"Val di Funes 유명 교회 사진 명소" },
+  { id:5,  name:"오르티세이",           en:"Ortisei",                    coords:[46.5769, 11.6700], type:"base",     day:"9/7~9",    desc:"돌로미티 거점 숙소 (3박)" },
+  { id:6,  name:"세체다",               en:"Seceda",                     coords:[46.5850, 11.6550], type:"mountain", day:"9/8",      desc:"케이블카 · 능선 360도 파노라마 트레킹" },
+  { id:7,  name:"알페 디 시우시",       en:"Alpe di Siusi",              coords:[46.5427, 11.6303], type:"mountain", day:"9/8",      desc:"유럽 최대 고원 초원 · 오후 햇빛이 예쁨" },
+  { id:8,  name:"셀라 패스",            en:"Passo Sella",                coords:[46.5085, 11.7648], type:"mountain", day:"9/9",      desc:"알프스 최고 드라이브 로드 · 봉우리 조망" },
+  { id:9,  name:"카레짜 호수",          en:"Lago di Carezza",            coords:[46.4080, 11.5736], type:"lake",     day:"9/9",      desc:"돌로미티의 보석 · 초록빛 호수 + 붉은 봉우리" },
+  { id:10, name:"브라이에스 호수",      en:"Lago di Braies",             coords:[46.6944, 12.0843], type:"lake",     day:"9/10 오전",desc:"아침 일찍 방문 필수 (07:00 출발) · 환상적인 반영" },
+  { id:11, name:"트레 치메",            en:"Tre Cime di Lavaredo",       coords:[46.6175, 12.3003], type:"mountain", day:"9/10 오후",desc:"돌로미티의 왕관 · 3개 봉우리 트레킹/전망" },
+  { id:12, name:"베로나",               en:"Verona",                     coords:[45.4386, 10.9928], type:"city",     day:"9/11",     desc:"아레나 디 베로나 · 투란도트 오페라 21:00" },
+  { id:13, name:"밀라노 말펜사",        en:"Milano Malpensa MXP",        coords:[45.6306, 8.7231],  type:"airport",  day:"9/12",     desc:"OZ582 22:00 출발 → 9/13 16:40 인천 도착" },
+];
+
+const typeColor = {
+  transit:  '#6366f1',
+  city:     '#f59e0b',
+  lake:     '#06b6d4',
+  mountain: '#10b981',
+  base:     '#f97316',
+  stop:     '#ec4899',
+  scenic:   '#ec4899',
+  airport:  '#64748b',
+};
+
+const transportBetween = [
+  // after stop index → badge type
+  { from:0, to:1, type:'train' },
+  { from:2, to:1, type:'car' },
+  { from:1, to:3, type:'car' },
+  { from:3, to:5, type:'car' },
+  { from:5, to:6, type:'car' },
+  { from:6, to:7, type:'car' },
+  { from:7, to:8, type:'car' },
+  { from:8, to:9, type:'car' },
+  { from:9, to:10, type:'car'},
+  { from:10, to:11, type:'car'},
+  { from:11, to:12, type:'car'},
+  { from:12, to:13, type:'train'},
+];
+
+// Route polylines
+const routeLines = [
+  // TGV: Nice → Milano
+  { path:[[43.7102,7.2620],[45.4862,9.2045]], color:'#3b82f6', dash:'8,8', weight:3 },
+  // Car: Milano → Bellagio (day trip loop)
+  { path:[[45.4862,9.2045],[45.9862,9.2594],[45.4862,9.2045]], color:'#86efac', dash:'4,4', weight:2.5 },
+  // Car: Milano → Riva del Garda → Santa Maddalena → Ortisei
+  { path:[[45.4862,9.2045],[45.8855,10.8410],[46.6305,11.7235],[46.5769,11.6700]], color:'#22c55e', dash:'', weight:3 },
+  // Day 4 loop: Ortisei → Seceda → Siusi → Ortisei
+  { path:[[46.5769,11.6700],[46.5850,11.6550],[46.5427,11.6303],[46.5769,11.6700]], color:'#86efac', dash:'4,4', weight:2 },
+  // Day 5 loop: Ortisei → Sella Pass → Carezza → Ortisei
+  { path:[[46.5769,11.6700],[46.5085,11.7648],[46.4080,11.5736],[46.5769,11.6700]], color:'#86efac', dash:'4,4', weight:2 },
+  // Car: Ortisei → Braies → Tre Cime
+  { path:[[46.5769,11.6700],[46.6944,12.0843],[46.6175,12.3003]], color:'#22c55e', dash:'', weight:3 },
+  // Car: Tre Cime → Verona
+  { path:[[46.6175,12.3003],[45.4386,10.9928]], color:'#22c55e', dash:'', weight:3 },
+  // Train: Verona → Milano
+  { path:[[45.4386,10.9928],[45.4862,9.2045]], color:'#3b82f6', dash:'8,8', weight:3 },
+  // Car: Milano → Malpensa
+  { path:[[45.4862,9.2045],[45.6306,8.7231]], color:'#22c55e', dash:'', weight:3 },
+];
+
+// Init map
+const map = L.map('map', { zoomControl: false });
+L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>',
+  maxZoom: 19,
+}).addTo(map);
+
+// Draw routes
+routeLines.forEach(r => {
+  const opts = { color: r.color, weight: r.weight, opacity: .85 };
+  if (r.dash) opts.dashArray = r.dash;
+  L.polyline(r.path, opts).addTo(map);
+});
+
+// Draw markers
+const markersList = [];
+stops.forEach(s => {
+  const color = typeColor[s.type] || '#94a3b8';
+  const icon = L.divIcon({
+    className: '',
+    html: `<div class="marker-circle" style="background:${color}">${s.id}</div>`,
+    iconSize: [28, 28], iconAnchor: [14, 14], popupAnchor: [0, -16],
+  });
+
+  const marker = L.marker(s.coords, { icon }).addTo(map)
+    .bindPopup(`
+      <div class="p-title">${s.name}</div>
+      <div class="p-en">${s.en}</div>
+      <div class="p-desc">${s.desc}</div>
+      <div class="p-day">📅 ${s.day}</div>
+    `);
+  markersList.push(marker);
+});
+
+// Sidebar stop list
+const listEl = document.getElementById('stop-list');
+stops.forEach((s, i) => {
+  const color = typeColor[s.type] || '#94a3b8';
+
+  // find transport badge for this stop (transport TO next)
+  const tr = transportBetween.find(t => t.from === s.id);
+  const badgeHtml = tr
+    ? `<span class="transport-badge badge-${tr.type}">${tr.type === 'train' ? '기차→' : '차→'}</span>`
+    : '';
+
+  const item = document.createElement('div');
+  item.className = 'stop-item';
+  item.innerHTML = `
+    <div class="stop-num" style="background:${color}">${s.id}</div>
+    <div class="stop-info">
+      <div class="stop-name">${s.name}</div>
+      <div class="stop-en">${s.en}</div>
+      <div class="stop-day">${s.day}</div>
+    </div>
+    ${badgeHtml}
+  `;
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.stop-item').forEach(el => el.classList.remove('active'));
+    item.classList.add('active');
+    map.flyTo(s.coords, 12, { duration: 1.2 });
+    markersList[i].openPopup();
+  });
+  listEl.appendChild(item);
+});
+
+// Fit all markers
+const allCoords = stops.map(s => s.coords);
+map.fitBounds(L.latLngBounds(allCoords), { padding: [40, 40] });
+</script>
+</body>
+</html>
