@@ -233,14 +233,20 @@
     .memo-table td:nth-child(1) { text-align: center; }
     .memo-table td:nth-child(5) { text-align: center; }
     .memo-table input[type="checkbox"] { width: 17px; height: 17px; cursor: pointer; accent-color: #065f46; }
-    .memo-table input[type="text"] {
+    .memo-table input[type="text"],
+    .memo-table textarea {
       width: 100%; padding: 5px 8px;
       border: 1px solid #e2e8f0; border-radius: 5px;
       font-size: .86rem; font-family: inherit; color: #1e293b;
     }
-    .memo-table input[type="text"]:focus {
+    .memo-table input[type="text"]:focus,
+    .memo-table textarea:focus {
       outline: none; border-color: #065f46;
       box-shadow: 0 0 0 2px rgba(6,95,70,.08);
+    }
+    .memo-table textarea {
+      resize: none; overflow: hidden;
+      min-height: 32px; line-height: 1.5;
     }
     .memo-table .writer-badge {
       display: inline-block; padding: 2px 9px;
@@ -256,7 +262,8 @@
     .memo-table .done { background: #f1f5f9; }
     .memo-table .done td { color: #94a3b8; }
     .memo-table .done .writer-badge { background: #e2e8f0; color: #94a3b8; }
-    .memo-table .done input[type="text"] { background: #f8fafc; color: #94a3b8; border-color: #e2e8f0; }
+    .memo-table .done input[type="text"],
+    .memo-table .done textarea { background: #f8fafc; color: #94a3b8; border-color: #e2e8f0; }
     .memo-table tbody tr:not(.done):hover { background: #f0fdf4; }
 
     .sync-status {
@@ -811,13 +818,14 @@ function toggleTip(el) { el.classList.toggle('checked'); }
   }
 
   function updateRow(tr, data) {
-    const chk    = tr.querySelector('input[type="checkbox"]');
-    const badge  = tr.querySelector('.writer-badge');
-    const inputs = tr.querySelectorAll('input[type="text"]');
+    const chk       = tr.querySelector('input[type="checkbox"]');
+    const badge     = tr.querySelector('.writer-badge');
+    const contentEl = tr.querySelector('[data-field="content"]');
+    const remarkEl  = tr.querySelector('[data-field="remark"]');
     if (chk)       chk.checked = !!data.done;
     if (badge)     badge.textContent = data.writer || '—';
-    if (inputs[0]) inputs[0].value = data.content || '';
-    if (inputs[1]) inputs[1].value = data.remark  || '';
+    if (contentEl) { contentEl.value = data.content || ''; if (contentEl.tagName === 'TEXTAREA') { contentEl.style.height = 'auto'; contentEl.style.height = contentEl.scrollHeight + 'px'; } }
+    if (remarkEl)  { remarkEl.value = data.remark || ''; if (remarkEl.tagName === 'TEXTAREA') { remarkEl.style.height = 'auto'; remarkEl.style.height = remarkEl.scrollHeight + 'px'; } }
     data.done ? tr.classList.add('done') : tr.classList.remove('done');
   }
 
@@ -850,12 +858,15 @@ function toggleTip(el) { el.classList.toggle('checked'); }
 
     // 내용
     const tdContent = document.createElement('td');
-    const inputContent = document.createElement('input');
-    inputContent.type = 'text';
+    const inputContent = document.createElement('textarea');
     inputContent.value = data.content || '';
     inputContent.placeholder = '내용';
+    inputContent.setAttribute('data-field', 'content');
+    const autoResize = el => { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; };
+    requestAnimationFrame(() => autoResize(inputContent));
     let ctTimer;
     inputContent.addEventListener('input', () => {
+      autoResize(inputContent);
       clearTimeout(ctTimer);
       ctTimer = setTimeout(() => {
         set(ref(db, `${MEMO_PATH}/${memoId}/content`), inputContent.value)
@@ -866,12 +877,14 @@ function toggleTip(el) { el.classList.toggle('checked'); }
 
     // 비고
     const tdRemark = document.createElement('td');
-    const inputRemark = document.createElement('input');
-    inputRemark.type = 'text';
+    const inputRemark = document.createElement('textarea');
+    inputRemark.setAttribute('data-field', 'remark');
     inputRemark.value = data.remark || '';
     inputRemark.placeholder = '비고';
+    requestAnimationFrame(() => autoResize(inputRemark));
     let rkTimer;
     inputRemark.addEventListener('input', () => {
+      autoResize(inputRemark);
       clearTimeout(rkTimer);
       rkTimer = setTimeout(() => {
         set(ref(db, `${MEMO_PATH}/${memoId}/remark`), inputRemark.value)
