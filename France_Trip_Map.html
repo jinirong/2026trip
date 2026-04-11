@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🇫🇷 프로방스–코트다쥐르 여행 루트 지도</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── 헤더 ── */
+    header {
+      background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 60%, #7c3aed 100%);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      box-shadow: 0 2px 12px rgba(0,0,0,.4);
+    }
+    header h1 { font-size: 1.15rem; font-weight: 700; }
+    header .meta { font-size: .8rem; opacity: .75; margin-top: 2px; }
+    .legend-row {
+      display: flex; gap: 18px; align-items: center; font-size: .78rem;
+    }
+    .legend-item { display: flex; align-items: center; gap: 5px; }
+    .legend-line {
+      width: 28px; height: 3px; border-radius: 2px;
+    }
+    .leg-train { background: #38bdf8; }
+    .leg-car   { background: #4ade80; }
+    .leg-bus   { background: #fbbf24; }
+
+    /* ── 메인 레이아웃 ── */
+    .main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── 사이드바 ── */
+    .sidebar {
+      width: 270px;
+      min-width: 270px;
+      background: #1e293b;
+      overflow-y: auto;
+      border-right: 1px solid #334155;
+      padding: 14px 0;
+      flex-shrink: 0;
+    }
+    .sidebar-title {
+      font-size: .72rem; font-weight: 700;
+      color: #64748b; letter-spacing: 1px; text-transform: uppercase;
+      padding: 0 16px 10px;
+    }
+    .stop-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 9px 16px;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: background .15s;
+    }
+    .stop-item:hover { background: #273549; }
+    .stop-item.active { background: #1d3557; border-left-color: #2563eb; }
+    .stop-num {
+      width: 24px; height: 24px; min-width: 24px;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: .75rem; font-weight: 700; color: #fff;
+      margin-top: 1px;
+    }
+    .stop-info { flex: 1; }
+    .stop-name { font-size: .88rem; font-weight: 600; color: #f1f5f9; }
+    .stop-sub  { font-size: .75rem; color: #64748b; margin-top: 1px; }
+    .stop-badge {
+      font-size: .65rem; font-weight: 600; padding: 2px 7px;
+      border-radius: 999px; white-space: nowrap; align-self: center;
+    }
+    .badge-train { background: #0c4a6e; color: #38bdf8; }
+    .badge-car   { background: #14532d; color: #4ade80; }
+    .badge-bus   { background: #451a03; color: #fbbf24; }
+    .badge-fly   { background: #3b0764; color: #c084fc; }
+    .badge-base  { background: #1e3a5f; color: #93c5fd; }
+
+    .transport-row {
+      display: flex; align-items: center; gap: 6px;
+      padding: 4px 16px 4px 48px;
+      font-size: .72rem; color: #475569;
+    }
+    .transport-row .line {
+      flex: 1; height: 1px; border-top: 2px dashed;
+    }
+    .tr-train .line { border-color: #38bdf8; }
+    .tr-car   .line { border-color: #4ade80; }
+    .tr-bus   .line { border-color: #fbbf24; }
+
+    /* ── 지도 ── */
+    #map {
+      flex: 1;
+    }
+
+    /* ── 팝업 커스텀 ── */
+    .custom-popup .leaflet-popup-content-wrapper {
+      background: #1e293b;
+      color: #f1f5f9;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.5);
+    }
+    .custom-popup .leaflet-popup-tip { background: #1e293b; }
+    .popup-title { font-size: 1rem; font-weight: 700; margin-bottom: 5px; }
+    .popup-day   { font-size: .78rem; color: #93c5fd; margin-bottom: 4px; }
+    .popup-notes { font-size: .82rem; color: #94a3b8; line-height: 1.6; }
+
+    @media (max-width: 650px) {
+      .sidebar { display: none; }
+      header .legend-row { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>🇫🇷 프로방스–코트다쥐르 여행 루트 지도</h1>
+    <div class="meta">2026년 8월 28일 ~ 9월 5일 &nbsp;·&nbsp; 가족 6명</div>
+  </div>
+  <div class="legend-row">
+    <div class="legend-item"><div class="legend-line leg-train"></div> 고속열차</div>
+    <div class="legend-item"><div class="legend-line leg-car"></div> 렌터카</div>
+    <div class="legend-item"><div class="legend-line leg-bus"></div> 대중교통</div>
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- 사이드바 -->
+  <div class="sidebar">
+    <div class="sidebar-title">여행 경로</div>
+    <div id="stop-list"></div>
+  </div>
+
+  <!-- 지도 -->
+  <div id="map"></div>
+
+</div>
+
+<script>
+  // ── 정류장 데이터 ──
+  const stops = [
+    {
+      num: 0, name: "파리 (샤를드골)", sub: "Day 1 · 8월 28일",
+      lat: 49.0097, lng: 2.5479,
+      color: "#a855f7", badge: "fly",
+      day: "Day 1 — 8월 28일 (금)",
+      notes: "✈️ 인천 출발 10:05 (OZ501)\n도착 17:20\nTGV로 아비뇽 이동"
+    },
+    {
+      num: 1, name: "아비뇽", sub: "Day 1~2 · 1박 거점",
+      lat: 43.9493, lng: 4.8055,
+      color: "#2563eb", badge: "base",
+      day: "Day 1~2 — 아비뇽",
+      notes: "🚄 파리→아비뇽 TGV (약 2시간 40분)\n교황청 궁전 · 아비뇽 다리\n☆ 렌터카 수령 (Day 2 오전)"
+    },
+    {
+      num: 2, name: "퐁텐느드보클뤼즈", sub: "Day 2 오후",
+      lat: 43.9167, lng: 5.1333,
+      color: "#0ea5e9", badge: "car",
+      day: "Day 2 — 8월 29일 (토)",
+      notes: "🚗 아비뇽에서 약 30분\n에메랄드빛 샘 · 마을 산책 (~1.5시간)\n페트라르카가 사랑한 마을"
+    },
+    {
+      num: 3, name: "고흐드", sub: "Day 2~4 · 3박 거점",
+      lat: 43.9111, lng: 5.2500,
+      color: "#2563eb", badge: "base",
+      day: "Day 2~4 — 고흐드 거점",
+      notes: "🚗 퐁텐느드보클뤼즈에서 약 20분\n절벽 위 중세 석조 마을 · 뤼베롱 전망\n★ 3박 에어비앤비 거점"
+    },
+    {
+      num: 4, name: "루씨용", sub: "Day 3 오전",
+      lat: 43.9059, lng: 5.2906,
+      color: "#ef4444", badge: "car",
+      day: "Day 3 — 8월 30일 (일)",
+      notes: "🔴 붉은 황토 절벽 트레일\nSentier des Ocres (~50분)\n고흐드에서 약 15분"
+    },
+    {
+      num: 5, name: "Château de Mille", sub: "Day 3 오후 · 와이너리",
+      lat: 43.8760, lng: 5.3780,
+      color: "#7c3aed", badge: "car",
+      day: "Day 3 — 와이너리 투어",
+      notes: "🍷 프로방스 로제 와인 시음\n아프트(Apt) 근처\n사전 예약 권장"
+    },
+    {
+      num: 6, name: "무스티에생뜨마리", sub: "Day 4 오전",
+      lat: 43.8456, lng: 6.2197,
+      color: "#0ea5e9", badge: "car",
+      day: "Day 4 — 8월 31일 (월)",
+      notes: "⭐ 프랑스 최아름다운 마을\n절벽 사이에 매달린 별\n도기 공방 · 골목 산책"
+    },
+    {
+      num: 7, name: "베르동협곡", sub: "Day 4 오후",
+      lat: 43.7400, lng: 6.3500,
+      color: "#16a34a", badge: "car",
+      day: "Day 4 — 베르동협곡",
+      notes: "🏞️ 유럽의 그랜드캐니언\n깊이 700m · 에메랄드빛 강\n드라이브 약 2~3시간\n에스크레뇨 전망대 · 생뜨크르와 호수"
+    },
+    {
+      num: 8, name: "봄레미모사", sub: "Day 5 오후",
+      lat: 43.1520, lng: 6.3500,
+      color: "#f59e0b", badge: "car",
+      day: "Day 5 — 9월 1일 (화)",
+      notes: "🌸 미모사꽃으로 유명한 언덕 마을\n지중해가 내려다보이는 골목 산책\n→ 니스까지 약 1시간 30분"
+    },
+    {
+      num: 9, name: "니스", sub: "Day 5~8 · 4박 거점",
+      lat: 43.7102, lng: 7.2620,
+      color: "#2563eb", badge: "base",
+      day: "Day 5~8 — 니스 거점",
+      notes: "🌊 코트다쥐르의 수도\n프롬나드 데 장글레 · 살레야 꽃시장\n★ 4박 에어비앤비 거점\n☆ 렌터카 반납 (Day 8 저녁)"
+    },
+    {
+      num: 10, name: "생폴드방스", sub: "Day 6 오후",
+      lat: 43.6980, lng: 7.1217,
+      color: "#f59e0b", badge: "bus",
+      day: "Day 6 — 9월 2일 (수)",
+      notes: "🎨 샤갈이 사랑한 예술가 마을\n마그 재단 미술관\n버스 400번으로 약 45분"
+    },
+    {
+      num: 11, name: "빌프랑슈르메르", sub: "Day 7 오후",
+      lat: 43.7067, lng: 7.3167,
+      color: "#f59e0b", badge: "bus",
+      day: "Day 7 — 9월 3일 (목)",
+      notes: "⚓ 코트다쥐르 최아름다운 항구\n색깔 있는 어촌 건물 · 성 피에르 예배당\n기차로 약 10분"
+    },
+    {
+      num: 12, name: "에제", sub: "Day 8 오전",
+      lat: 43.7289, lng: 7.3622,
+      color: "#f59e0b", badge: "bus",
+      day: "Day 8 — 9월 4일 (금)",
+      notes: "🦅 해발 400m 독수리 둥지 마을\n열대 정원(Jardin Exotique)\n니체의 산책로(Chemin de Nietzsche)"
+    },
+    {
+      num: 13, name: "모나코", sub: "Day 8 오후",
+      lat: 43.7384, lng: 7.4246,
+      color: "#ef4444", badge: "bus",
+      day: "Day 8 — 모나코",
+      notes: "🎰 세계 2번째로 작은 나라\n카지노 광장 · 왕궁 · 항구\n에제→모나코 버스 112번 (~15분)\n모나코→니스 기차 (~25분)"
+    }
+  ];
+
+  // 이동수단 연결선 정의
+  const routes = [
+    { from: 0, to: 1,  mode: "train", color: "#38bdf8", dash: "8,6" },
+    { from: 1, to: 2,  mode: "car",   color: "#4ade80", dash: null  },
+    { from: 2, to: 3,  mode: "car",   color: "#4ade80", dash: null  },
+    { from: 3, to: 4,  mode: "car",   color: "#4ade80", dash: null  },
+    { from: 4, to: 5,  mode: "car",   color: "#4ade80", dash: null  },
+    { from: 5, to: 6,  mode: "car",   color: "#4ade80", dash: null  },
+    { from: 6, to: 7,  mode: "car",   color: "#4ade80", dash: null  },
+    { from: 7, to: 8,  mode: "car",   color: "#4ade80", dash: null  },
+    { from: 8, to: 9,  mode: "car",   color: "#4ade80", dash: null  },
+    { from: 9, to: 10, mode: "bus",   color: "#fbbf24", dash: "4,5" },
+    { from: 9, to: 11, mode: "bus",   color: "#fbbf24", dash: "4,5" },
+    { from: 9, to: 12, mode: "bus",   color: "#fbbf24", dash: "4,5" },
+    { from: 12,to: 13, mode: "bus",   color: "#fbbf24", dash: "4,5" },
+  ];
+
+  const badgeLabel = { fly: "✈️ 항공", base: "🏠 거점", car: "🚗 렌터카", bus: "🚌 대중교통", train: "🚄 열차" };
+
+  // ── 지도 초기화 ──
+  const map = L.map('map', {
+    center: [44.0, 5.8],
+    zoom: 8,
+    zoomControl: true,
+  });
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/">CARTO</a>',
+    subdomains: 'abcd',
+    maxZoom: 19,
+  }).addTo(map);
+
+  // ── 경로 선 그리기 ──
+  routes.forEach(r => {
+    const from = stops[r.from];
+    const to   = stops[r.to];
+    const opts = {
+      color: r.color,
+      weight: r.mode === 'train' ? 3.5 : 2.5,
+      opacity: 0.8,
+    };
+    if (r.dash) opts.dashArray = r.dash;
+    L.polyline([[from.lat, from.lng], [to.lat, to.lng]], opts).addTo(map);
+  });
+
+  // ── 마커 ──
+  const markers = [];
+  stops.forEach((s, i) => {
+    const icon = L.divIcon({
+      className: '',
+      html: `<div style="
+        width:30px;height:30px;border-radius:50%;
+        background:${s.color};
+        border:3px solid #fff;
+        display:flex;align-items:center;justify-content:center;
+        font-size:12px;font-weight:700;color:#fff;
+        box-shadow:0 2px 8px rgba(0,0,0,.45);
+        cursor:pointer;
+      ">${s.num === 0 ? '✈' : s.num}</div>`,
+      iconSize: [30, 30],
+      iconAnchor: [15, 15],
+      popupAnchor: [0, -18],
+    });
+
+    const popupContent = `
+      <div class="popup-title">${s.name}</div>
+      <div class="popup-day">${s.day}</div>
+      <div class="popup-notes">${s.notes.replace(/\n/g, '<br>')}</div>
+    `;
+
+    const marker = L.marker([s.lat, s.lng], { icon })
+      .addTo(map)
+      .bindPopup(popupContent, {
+        className: 'custom-popup',
+        maxWidth: 240,
+      });
+
+    markers.push(marker);
+  });
+
+  // ── 사이드바 렌더링 ──
+  const stopList = document.getElementById('stop-list');
+
+  const transportBetween = [
+    null,
+    { icon: '🚄', label: '고속열차 TGV', cls: 'tr-train' },
+    { icon: '🚗', label: '렌터카', cls: 'tr-car' },
+    { icon: '🚗', label: '렌터카', cls: 'tr-car' },
+    { icon: '🚗', label: '렌터카', cls: 'tr-car' },
+    { icon: '🚗', label: '렌터카', cls: 'tr-car' },
+    { icon: '🚗', label: '렌터카', cls: 'tr-car' },
+    { icon: '🚗', label: '렌터카', cls: 'tr-car' },
+    { icon: '🚗', label: '렌터카', cls: 'tr-car' },
+    { icon: '🚗', label: '렌터카', cls: 'tr-car' },
+    { icon: '🚌', label: '버스 400번', cls: 'tr-bus' },
+    { icon: '🚂', label: '기차 10분', cls: 'tr-bus' },
+    { icon: '🚌', label: '버스/기차', cls: 'tr-bus' },
+    { icon: '🚌', label: '버스 112번', cls: 'tr-bus' },
+  ];
+
+  stops.forEach((s, i) => {
+    if (i > 0 && transportBetween[i]) {
+      const t = transportBetween[i];
+      const row = document.createElement('div');
+      row.className = `transport-row ${t.cls}`;
+      row.innerHTML = `<div class="line"></div><span>${t.icon} ${t.label}</span><div class="line"></div>`;
+      stopList.appendChild(row);
+    }
+
+    const item = document.createElement('div');
+    item.className = 'stop-item';
+    item.innerHTML = `
+      <div class="stop-num" style="background:${s.color}">${i === 0 ? '✈' : i}</div>
+      <div class="stop-info">
+        <div class="stop-name">${s.name}</div>
+        <div class="stop-sub">${s.sub}</div>
+      </div>
+      <span class="stop-badge badge-${s.badge}">${badgeLabel[s.badge]}</span>
+    `;
+    item.addEventListener('click', () => {
+      map.setView([s.lat, s.lng], 12, { animate: true });
+      markers[i].openPopup();
+      document.querySelectorAll('.stop-item').forEach(el => el.classList.remove('active'));
+      item.classList.add('active');
+    });
+    stopList.appendChild(item);
+  });
+
+  // ── 지도 범위를 모든 마커에 맞추기 ──
+  const bounds = L.latLngBounds(stops.map(s => [s.lat, s.lng]));
+  map.fitBounds(bounds, { padding: [40, 40] });
+</script>
+
+</body>
+</html>
