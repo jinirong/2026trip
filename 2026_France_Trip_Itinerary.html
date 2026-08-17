@@ -189,16 +189,19 @@
     }
     .memo-add-row button:hover { background: #1d4ed8; }
 
-    .memo-table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+    .memo-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .memo-table { width: 100%; min-width: 560px; table-layout: fixed; border-collapse: collapse; font-size: .88rem; }
     .memo-table thead tr { background: #f1f5f9; }
     .memo-table thead th {
       padding: 9px 10px; font-weight: 600; color: var(--gray);
       border-bottom: 2px solid var(--border); text-align: left;
     }
-    .memo-table thead th:nth-child(1) { width: 50px; text-align: center; }
-    .memo-table thead th:nth-child(2) { width: 110px; }
-    .memo-table thead th:nth-child(4) { width: 140px; }
+    .memo-table thead th:nth-child(1) { width: 64px; text-align: center; }
+    .memo-table thead th:nth-child(2) { width: 90px; }
+    .memo-table thead th:nth-child(3) { width: auto; }
+    .memo-table thead th:nth-child(4) { width: 130px; }
     .memo-table thead th:nth-child(5) { width: 52px; text-align: center; }
+    .memo-table td { word-break: break-word; }
     .memo-table tbody tr { border-bottom: 1px solid var(--border); transition: background .12s; }
     .memo-table tbody tr:last-child { border-bottom: none; }
     .memo-table tbody tr:hover { background: #f8fafc; }
@@ -305,7 +308,6 @@
         <tr><th>기간</th><td>2026년 8월 28일 (금) ~ 9월 5일 (토) · 총 9일</td></tr>
         <tr><th>인원</th><td>가족 6명 — 엄마, 아빠, 왕섭, 승연, 지현, 지은</td></tr>
         <tr><th>이동</th><td>파리→아비뇽 고속열차 &nbsp;·&nbsp; 아비뇽~니스 렌터카 &nbsp;·&nbsp; 니스·모나코 대중교통</td></tr>
-        <tr><th>숙소</th><td>에어비앤비 (미정)</td></tr>
       </tbody>
     </table>
   </div>
@@ -455,14 +457,13 @@
         <thead><tr><th style="width:80px">시간대</th><th>일정</th></tr></thead>
         <tbody>
           <tr><td>오전</td><td>인천공항 출발 (OZ501, 10:05)</td></tr>
-          <tr><td>오후</td><td>파리 샤를드골 도착 (17:20) → 고속열차로 아비뇽 이동</td></tr>
-          <tr><td>저녁</td><td>아비뇽 체크인</td></tr>
+          <tr><td>오후</td><td>파리 샤를드골 도착 (17:20) → TGV로 아비뇽 이동</td></tr>
+          <tr><td>저녁</td><td>아비뇽 숙소 체크인</td></tr>
         </tbody>
       </table>
       <ul class="note-list">
-        <li>파리 도착 후 RER B → 리옹역 이동, TGV 탑승 (약 2시간 40분)</li>
-        <li>아비뇽 구시가지 성벽 야경 감상 (가능 시)</li>
-        <li><strong>숙박:</strong> 아비뇽 구시가지 성벽 안쪽 또는 인근 · 1박</li>
+        <li>TGV : Paris Roissy Charles de Gaulle Airport(TGV station CDG2) 19:58 → Avignon TGV 23:09</li>
+        <li><strong>숙박:</strong> 아비뇽 : hotelF1 Avignon Centre Courtine gare TGV · 1박</li>
       </ul>
     </div>
   </div>
@@ -487,7 +488,7 @@
         <li><strong>아비뇽 시내:</strong> 교황청 궁전(Palais des Papes), 아비뇽 다리(Pont Saint-Bénézet)</li>
         <li><strong>퐁텐느드보클뤼즈:</strong> 에메랄드빛 샘, 마을 산책 (~1.5시간)</li>
         <li><strong>고흐드:</strong> 절벽 위 석조 마을, 뤼베롱 전망</li>
-        <li><strong>숙박:</strong> 고흐드(Gordes) 주변 또는 아프트(Apt) 인근 · 3박 거점</li>
+        <li><strong>숙박:</strong> 압트(Apt) : Hotel Carina-Très Grande Piscine-Local à Vélo · 1박</li>
       </ul>
     </div>
   </div>
@@ -511,7 +512,7 @@
       <ul class="note-list">
         <li><strong>루씨용:</strong> 붉은 황토 절벽 트레일(Sentier des Ocres), 마을 갤러리·카페</li>
         <li><strong>Château de Mille:</strong> 아프트(Apt) 근처, 사전 예약 권장</li>
-        <li><strong>숙박:</strong> 고흐드 거점 연박</li>
+        <li><strong>숙박:</strong> 무스티에생뜨마리(Moustiers-Sainte-Marie) · 2박 거점 시작</li>
       </ul>
     </div>
   </div>
@@ -534,9 +535,9 @@
       </table>
       <ul class="note-list">
         <li><strong>무스티에생뜨마리:</strong> 프랑스 최아름다운 마을 선정. 절벽 사이에 매달린 별, 도기 공방</li>
-        <li><strong>베르동협곡(Gorges du Verdon):</strong> 에스크레뇨 전망대, 생뜨크르와 에메랄드빛 호수</li>
+        <li><strong>베르동협곡(Gorges du Verdon):</strong> 에스크레뇨 전망대, 라크 드 생뜨크르와 에메랄드빛 호수</li>
         <li>협곡 드라이브 약 2~3시간 소요 예상</li>
-        <li><strong>숙박:</strong> 고흐드 거점 연박</li>
+        <li><strong>숙박:</strong> 무스티에생뜨마리(Moustiers-Sainte-Marie) · 2박 거점</li>
       </ul>
     </div>
   </div>
@@ -559,7 +560,8 @@
       <ul class="note-list">
         <li><strong>봄레미모사:</strong> 미모사꽃으로 유명한 프로방스식 언덕 마을. 지중해가 내려다보이는 골목 산책</li>
         <li>봄레미모사 → 니스 약 1시간 30분 소요</li>
-        <li><strong>숙박:</strong> 니스 구시가지(Vieux-Nice) 또는 프롬나드 동쪽 · 4박 거점</li>
+        <li>☆ 렌터카 반납 : 니스 23시</li>
+        <li><strong>숙박:</strong> 니스 4박 거점</li>
       </ul>
     </div>
   </div>
@@ -599,10 +601,10 @@
       <table>
         <thead><tr><th style="width:80px">시간대</th><th>일정</th></tr></thead>
         <tbody>
-          <tr><td>오전</td><td>니스 자유 일정 (쇼핑·휴식·해수욕)</td></tr>
-          <tr><td>점심</td><td>니스 해변 레스토랑</td></tr>
-          <tr><td>오후</td><td>빌프랑슈르메르 방문</td></tr>
-          <tr><td>저녁</td><td>니스 귀환</td></tr>
+          <tr><td>오전</td><td>빌프랑슈르메르 / 스냅사진 (11시 : 1시간 30분)</td></tr>
+          <tr><td>점심</td><td>빌프랑슈르메르 레스토랑</td></tr>
+          <tr><td>오후</td><td>니스 자유 일정 (쇼핑·휴식·해수욕)</td></tr>
+          <tr><td>저녁</td><td>니스 해변 레스토랑</td></tr>
         </tbody>
       </table>
       <ul class="note-list">
@@ -626,7 +628,7 @@
           <tr><td>오전</td><td>에제(Èze) 방문</td></tr>
           <tr><td>점심</td><td>에제 마을 내 식사</td></tr>
           <tr><td>오후</td><td>모나코 이동 · 관광</td></tr>
-          <tr><td>저녁</td><td>☆ 렌터카 반납 (니스), 니스 귀환</td></tr>
+          <tr><td>저녁</td><td>니스 귀환</td></tr>
         </tbody>
       </table>
       <ul class="note-list">
@@ -657,7 +659,7 @@
         <tbody>
           <tr><td>아빠, 승연</td><td>TK1814 니스→이스탄불 · OZ552 이스탄불→인천</td><td>10:45</td></tr>
           <tr><td>지현</td><td>LO342 니스→바르샤바 · LO099 바르샤바→인천</td><td>10:40</td></tr>
-          <tr><td>엄마, 왕섭, 지은</td><td><em>미정</em></td><td>—</td></tr>
+          <tr><td>엄마, 왕섭, 지은</td><td>니스역→이탈리아(베로나)</td><td>07:23</td></tr>
         </tbody>
       </table>
     </div>
@@ -667,40 +669,39 @@
   <div class="section-title">🏨 숙박 계획 (에어비앤비)</div>
   <div class="card">
     <table>
-      <thead><tr><th>날짜</th><th>지역</th><th>비고</th><th>박수</th></tr></thead>
+      <thead><tr><th>날짜</th><th>숙소</th><th>박수</th></tr></thead>
       <tbody>
         <tr>
           <td>8/28 (금)</td>
-          <td>아비뇽 구시가지 성벽 안쪽</td>
-          <td>렌터카 수령 전 · 역 근처 편리</td>
+          <td>아비뇽</td>
           <td><span class="stay-badge">1박</span></td>
         </tr>
         <tr>
-          <td>8/29~8/31 (토~월)</td>
-          <td>고흐드(Gordes) 주변 5km 이내 또는 아프트(Apt) 인근</td>
-          <td>퐁텐느드보클뤼즈·루씨용·베르동협곡 당일치기 최적 거점</td>
-          <td><span class="stay-badge">3박</span></td>
+          <td>8/29 (토)</td>
+          <td>압트(Apt) : Hotel Carina-Très Grande Piscine-Local à Vélo</td>
+          <td><span class="stay-badge">1박</span></td>
+        </tr>
+        <tr>
+          <td>8/30~8/31 (일~월)</td>
+          <td>무스티에생뜨마리</td>
+          <td><span class="stay-badge">2박</span></td>
         </tr>
         <tr>
           <td>9/1~9/4 (화~금)</td>
-          <td>니스 구시가지(Vieux-Nice) 또는 프롬나드 데 장글레 동쪽</td>
-          <td>생폴드방스·빌프랑슈르메르·에제·모나코 버스/기차 접근 편리</td>
+          <td>니스</td>
           <td><span class="stay-badge">4박</span></td>
         </tr>
       </tbody>
     </table>
-    <p style="margin-top:14px; font-size:.85rem; color:var(--rose)">
-      ⚠️ 8월 성수기 — 고흐드 주변 6인 빌라는 빨리 소진됩니다. 아프트(Apt) 또는 쿠스텔레(Coustellet) 등으로 검색 범위를 넓히세요.
-    </p>
   </div>
 
   <!-- ── 렌터카 ── -->
   <div class="section-title">🚗 렌터카</div>
   <div class="card">
     <ul class="car-list">
-      <li><strong>수령:</strong> 8월 29일 (토) 아비뇽</li>
-      <li><strong>반납:</strong> 9월 4일 (금) 니스</li>
-      <li>6명 이동이므로 넉넉한 차종 예약 필수</li>
+      <li><strong>업체:</strong> Europcar</li>
+      <li><strong>수령:</strong> 8월 29일 아비뇽 13시</li>
+      <li><strong>반납:</strong> 9월 1일 니스 23시</li>
       <li>국제운전면허증 지참 (운전자 전원)</li>
       <li>프랑스 고속도로(Autoroute) 통행료 — 현금/카드 준비</li>
     </ul>
@@ -725,18 +726,20 @@
       <button id="memo-add-btn">추가</button>
     </div>
     <div class="sync-status" id="memo-sync-status"></div>
-    <table class="memo-table">
-      <thead>
-        <tr>
-          <th>반영여부</th>
-          <th>기록자</th>
-          <th>내용</th>
-          <th>비고</th>
-          <th>삭제</th>
-        </tr>
-      </thead>
-      <tbody id="memo-tbody"></tbody>
-    </table>
+    <div class="memo-table-wrap">
+      <table class="memo-table">
+        <thead>
+          <tr>
+            <th>반영여부</th>
+            <th>기록자</th>
+            <th>내용</th>
+            <th>비고</th>
+            <th>삭제</th>
+          </tr>
+        </thead>
+        <tbody id="memo-tbody"></tbody>
+      </table>
+    </div>
   </div>
 
   <!-- ── 준비 체크리스트 ── -->
@@ -748,17 +751,19 @@
       <button id="cl-add-btn">추가</button>
     </div>
     <div class="sync-status" id="cl-sync-status"></div>
-    <table class="memo-table">
-      <thead>
-        <tr>
-          <th style="width:50px;text-align:center;">완료</th>
-          <th>항목</th>
-          <th style="width:160px;">비고</th>
-          <th style="width:52px;text-align:center;">삭제</th>
-        </tr>
-      </thead>
-      <tbody id="cl-tbody"></tbody>
-    </table>
+    <div class="memo-table-wrap">
+      <table class="memo-table">
+        <thead>
+          <tr>
+            <th style="width:50px;text-align:center;">완료</th>
+            <th>항목</th>
+            <th style="width:160px;">비고</th>
+            <th style="width:52px;text-align:center;">삭제</th>
+          </tr>
+        </thead>
+        <tbody id="cl-tbody"></tbody>
+      </table>
+    </div>
   </div>
 
 </div><!-- /container -->
@@ -800,14 +805,15 @@
   const CL_DEFAULTS = [
     '항공편 예약 확인 (전원)',
     '렌터카 예약 (6인승 이상)',
-    '숙소 예약 — 아비뇽 1박 / 고흐드 3박 / 니스 4박',
+    'TGV 예약 (파리 > 아비뇽)',
+    '숙소 예약',
     '국제운전면허증 발급',
     '여행자 보험 가입',
     '유럽 SIM 또는 로밍 준비',
     'Château de Mille 와이너리 투어 사전 예약',
     '루씨용 오크르 트레일 입장권 확인',
     '유로 환전',
-    '엄마 환갑 기념 이벤트 준비 🎂'
+    '스냅사진'
   ];
 
   function clSetStatus(msg, type) {
